@@ -52,4 +52,66 @@ public class CompletableFutureHelloWorldException {
 
         return rs;
     }
+
+    public String helloworld_three_async_calls_exceptionally() {
+        startTimer();
+        CompletableFuture<String> hello =  CompletableFuture.supplyAsync(() -> helloWorldService.hello());
+        CompletableFuture<String> world =  CompletableFuture.supplyAsync(() -> helloWorldService.world());
+        CompletableFuture<String> hiCompletableFuture =  CompletableFuture.supplyAsync(() -> {
+            delay(1000);
+            return " Hi CompletableFuture!";
+        });
+
+        String rs = hello
+                .exceptionally((e) -> {
+                    log("Exception is : " + e.getMessage());
+                    return "";
+                })
+                .thenCombine(world, (h, w) -> h+w)
+                .exceptionally((e) -> {
+                    log("Exception after world is : " + e.getMessage());
+                    return "";
+                })
+                .thenCombine(hiCompletableFuture, (prev, curr) -> prev + curr)
+                .thenApply(String::toUpperCase)
+                .join();
+
+        timeTaken();
+
+        return rs;
+    }
+
+    public String helloworld_three_async_calls_whenComplete() {
+        startTimer();
+        CompletableFuture<String> hello =  CompletableFuture.supplyAsync(() -> helloWorldService.hello());
+        CompletableFuture<String> world =  CompletableFuture.supplyAsync(() -> helloWorldService.world());
+        CompletableFuture<String> hiCompletableFuture =  CompletableFuture.supplyAsync(() -> {
+            delay(1000);
+            return " Hi CompletableFuture!";
+        });
+
+        String rs = hello
+                .whenComplete((res, e) -> {
+                    if (e!=null) {
+                        log("Exception is : " + e.getMessage());
+                    }
+                })
+                .thenCombine(world, (h, w) -> h+w)
+                .whenComplete((res, e) -> {
+                    if (e!=null) {
+                        log("Exception after world is : " + e.getMessage());
+                    }
+                })
+                .exceptionally((e) -> {
+                    log("Exception after thenCombine is : " + e.getMessage());
+                    return "";
+                })
+                .thenCombine(hiCompletableFuture, (prev, curr) -> prev + curr)
+                .thenApply(String::toUpperCase)
+                .join();
+
+        timeTaken();
+
+        return rs;
+    }
 }
