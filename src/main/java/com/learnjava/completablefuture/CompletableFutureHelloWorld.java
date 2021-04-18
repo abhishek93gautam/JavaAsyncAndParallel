@@ -4,6 +4,8 @@ import com.learnjava.service.HelloWorldService;
 import lombok.AllArgsConstructor;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static com.learnjava.util.CommonUtil.*;
 import static com.learnjava.util.LoggerUtil.log;
@@ -51,6 +53,128 @@ public class CompletableFutureHelloWorld {
                 .thenCombine(world, (h, w) -> h+w)
                 .thenCombine(hiCompletableFuture, (prev, curr) -> prev + curr)
                 .thenApply(String::toUpperCase)
+                .join();
+
+        timeTaken();
+
+        return rs;
+    }
+
+    public String helloworld_three_async_calls_log() {
+        startTimer();
+        CompletableFuture<String> hello =  CompletableFuture.supplyAsync(() -> helloWorldService.hello());
+        CompletableFuture<String> world =  CompletableFuture.supplyAsync(() -> helloWorldService.world());
+        CompletableFuture<String> hiCompletableFuture =  CompletableFuture.supplyAsync(() -> {
+            delay(1000);
+            return " Hi CompletableFuture!";
+        });
+
+        String rs = hello
+                .thenCombine(world, (h, w) -> {
+                    log("thenCombine hello/world");
+                    return h+w;
+                })
+                .thenCombine(hiCompletableFuture, (prev, curr) -> {
+                    log("thenCombine previous/current");
+                    return prev + curr;
+                })
+                .thenApply(s -> {
+                    log("thenApply toUpperCase");
+                    return s.toUpperCase();
+                })
+                .join();
+
+        timeTaken();
+
+        return rs;
+    }
+
+    public String helloworld_three_async_calls_log_async() {
+        startTimer();
+        CompletableFuture<String> hello =  CompletableFuture.supplyAsync(() -> helloWorldService.hello());
+        CompletableFuture<String> world =  CompletableFuture.supplyAsync(() -> helloWorldService.world());
+        CompletableFuture<String> hiCompletableFuture =  CompletableFuture.supplyAsync(() -> {
+            delay(1000);
+            return " Hi CompletableFuture!";
+        });
+
+        String rs = hello
+                .thenCombineAsync(world, (h, w) -> {
+                    log("thenCombine hello/world");
+                    return h+w;
+                })
+                .thenCombineAsync(hiCompletableFuture, (prev, curr) -> {
+                    log("thenCombine previous/current");
+                    return prev + curr;
+                })
+                .thenApplyAsync(s -> {
+                    log("thenApply toUpperCase");
+                    return s.toUpperCase();
+                })
+                .join();
+
+        timeTaken();
+
+        return rs;
+    }
+
+    public String helloworld_three_async_calls_custom_threadpool() {
+        startTimer();
+
+        ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+        CompletableFuture<String> hello =  CompletableFuture.supplyAsync(() -> helloWorldService.hello(), executorService);
+        CompletableFuture<String> world =  CompletableFuture.supplyAsync(() -> helloWorldService.world(), executorService);
+        CompletableFuture<String> hiCompletableFuture =  CompletableFuture.supplyAsync(() -> {
+            delay(1000);
+            return " Hi CompletableFuture!";
+        }, executorService);
+
+        String rs = hello
+                .thenCombine(world, (h, w) -> {
+                    log("thenCombine hello/world");
+                    return h+w;
+                })
+                .thenCombine(hiCompletableFuture, (prev, curr) -> {
+                    log("thenCombine previous/current");
+                    return prev + curr;
+                })
+                .thenApply(s -> {
+                    log("thenApply toUpperCase");
+                    return s.toUpperCase();
+                })
+                .join();
+
+        timeTaken();
+
+        return rs;
+    }
+
+    public String helloworld_three_async_calls_custom_threadpool_async() {
+        startTimer();
+
+        ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+        CompletableFuture<String> hello =  CompletableFuture.supplyAsync(() -> helloWorldService.hello(), executorService);
+        CompletableFuture<String> world =  CompletableFuture.supplyAsync(() -> helloWorldService.world(), executorService);
+        CompletableFuture<String> hiCompletableFuture =  CompletableFuture.supplyAsync(() -> {
+            delay(1000);
+            return " Hi CompletableFuture!";
+        }, executorService);
+
+        String rs = hello
+                .thenCombineAsync(world, (h, w) -> {
+                    log("thenCombine hello/world");
+                    return h+w;
+                }, executorService)
+                .thenCombineAsync(hiCompletableFuture, (prev, curr) -> {
+                    log("thenCombine previous/current");
+                    return prev + curr;
+                }, executorService)
+                .thenApplyAsync(s -> {
+                    log("thenApply toUpperCase");
+                    return s.toUpperCase();
+                }, executorService)
                 .join();
 
         timeTaken();
