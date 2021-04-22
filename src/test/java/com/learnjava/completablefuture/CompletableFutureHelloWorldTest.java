@@ -93,6 +93,15 @@ class CompletableFutureHelloWorldTest {
     }
 
     @Test
+    void anyOf() {
+        //given
+        //when
+        String helloworld = completableFutureHelloWorld.anyOf();
+        //then
+        assertEquals("Hello world", helloworld);
+    }
+
+    @Test
     void helloWorld_4_async_calls() {
         //given
         //when
